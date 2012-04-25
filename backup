@@ -27,10 +27,9 @@ fi
 
 touch ~/.lock/backup-$remote
 
-RET=0
-
-backup_dir /home/niklas /mnt/crypt_single1/home/niklas  "--delete --exclude=mnt"
-backup_dir /mnt/data /mnt/crypt_single1
+ret=0
+backup_dir /home/niklas /mnt/crypt_single1/home/niklas  "--delete --exclude=mnt" || ret=1
+backup_dir /mnt/data /mnt/crypt_single1                                          || ret=1
 
 # remove lock
 rm ~/.lock/backup-$remote
