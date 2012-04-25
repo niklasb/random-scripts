@@ -1,0 +1,35 @@
+#!/bin/sh
+
+if [[ "$1" == "-v" ]]; then
+  rsync_opts="-v"
+else
+  rsync_opts=""
+fi
+
+backup_dir() {
+  echo "Backing up dir $1 to $2..."
+  eval nice -n 20 ionice -c 3 -n 7 rsync \
+         -auz $rsync_opts $3 \
+         -e \"ssh -i $HOME/.ssh/id_rsa_rsync_barney\" \
+         $1/ barney:$2
+  return $?
+}
+
+# check for lock
+if [ -e ~/.lock/backup-to-barney ]; then
+  echo >&2 "locked!"
+  exit 111
+fi
+
+touch ~/.lock/backup-to-barney
+
+RET=0
+
+backup_dir /home/niklas /mnt/crypt_single1/home/niklas  "--delete --exclude=mnt"
+backup_dir /mnt/data /mnt/crypt_single1
+
+# remove lock
+rm ~/.lock/backup-to-barney
+
+exit $ret
+
